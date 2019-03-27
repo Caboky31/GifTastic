@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>TV Shows!</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="http://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>TV Shows</h1>
+
+        <!-- created buttons will get populated here  -->
+        <div id="createdButtons"></div>
+
+        <form id="tv-form">
+            <label for="tv-input">Add TV Show!</label>
+            <input type="text" id="tvInputValue">
+            <br>
+            <!-- Button adds new tv show button -->
+            <input id="add-tvshow" type="submit" value="Pick a tv show!">
+        </form>
+        <!-- List shows here -->
+        <div id="displayTvShowGiphs"></div>
+        <script>
+
+            var searchArray = ['lost', 'twin peaks', 'cheers'];
+            createButton();
+            function createButton() {
+
+                $("#createdButtons").empty();
+                // Loops through the array of tvshows
+                for (var i = 0; i < searchArray.length; i++) {
+                    // Then dynamicaly generates buttons for each show in the array
+                    // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+                    var a = $("<button>");
+                    // Adds a class of tvshow to our button
+                    a.addClass("tvshowClass");
+                    // Added a data-attribute
+                    a.attr("giphy-name", searchArray[i]);
+                    // Provided the initial button text
+                    a.text(searchArray[i]);
+                    // Added the button to the buttons-view div
+                    $("#createdButtons").prepend(a);
+
+                }
+            }
+
+            function displayTvGiphs(TheTVShow) {
+                // var showGiphy = $(this).attr(giphy-name);
+                var queryURL = "https://api.giphy.com/v1/gifs/search?api_key=WhrV8JCgxVoFi1krl5QjdU7j4AWiHys9&q=" + TheTVShow + "&limit=10&offset=0&rating=R&lang=en"
+
+
+                // call ajax//
+                $.ajax({
+                    url: queryURL,
+                    method: "GET"
+                }).then(function (response) {
+
+                    var results = response.data;
+
+                    for (var i = 0; i < results.length; i++) {
+                        var gifDiv = $("<div>");
+                        var rating = results[i].rating;
+                        var p = $("<p>").text("Rating: " + rating);
+                        var animated = response.data[i].images.fixed_height.url;
+                        var still = response.data[i].images.fixed_height_still.url;
+                        var image = $('<img>');
+                        image.attr('src',still);
+                        image.attr('data-still',still);
+                        image.attr('data-animated',animated);
+                        image.attr('data-state','still');
+                        image.addClass('searchImage');
+                        gifDiv.append(p);
+                        gifDiv.append(image);
+                        $("#displayTvShowGiphs").append(gifDiv);
+                    }
+
+                });
+            }
+            $(document).on("click", '.searchImage', function() {
+      // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+      var state = $(this).attr("data-state");
+      // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+      // Then, set the image's data-state to animate
+      // Else set src to the data-still value
+      if (state == "still") {
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate");
+        console.log("changing to animate")
+      } else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still");
+        console.log("changing to still")
+      }
+    });
+         
+        
+
+            $('#add-tvshow').on("click", function(event) {
+                event.preventDefault();
+                var tvShow = $('#tvInputValue').val().trim();
+                searchArray.push(tvShow);
+                console.log(searchArray);
+                createButton();
+                $(document).on('click',".tvshowClass", displayTvGiphs(tvShow));
+            });
+
+
+            $('.tvshowClass').click(function() {
+                var tvShowName = $(this).attr("giphy-name");
+                displayTvGiphs(tvShowName);
+            });
+
+
+        </script>
+    </div>
+</body>
+
+</html>
