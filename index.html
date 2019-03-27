@@ -45,7 +45,7 @@
                     // Provided the initial button text
                     a.text(searchArray[i]);
                     // Added the button to the buttons-view div
-                    $("#createdButtons").append(a);
+                    $("#createdButtons").prepend(a);
 
                 }
             }
@@ -67,16 +67,38 @@
                         var gifDiv = $("<div>");
                         var rating = results[i].rating;
                         var p = $("<p>").text("Rating: " + rating);
-                        var personImage = $("<img>");
-                        personImage.attr("src", results[i].images.fixed_height.url);
-                        gifDiv.prepend(p);
-                        gifDiv.prepend(personImage);
-
-                        $("#displayTvShowGiphs").prepend(gifDiv);
+                        var animated = response.data[i].images.fixed_height.url;
+                        var still = response.data[i].images.fixed_height_still.url;
+                        var image = $('<img>');
+                        image.attr('src',still);
+                        image.attr('data-still',still);
+                        image.attr('data-animated',animated);
+                        image.attr('data-state','still');
+                        image.addClass('searchImage');
+                        gifDiv.append(p);
+                        gifDiv.append(image);
+                        $("#displayTvShowGiphs").append(gifDiv);
                     }
 
                 });
             }
+            $(document).on("click", '.searchImage', function() {
+      // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+      var state = $(this).attr("data-state");
+      // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+      // Then, set the image's data-state to animate
+      // Else set src to the data-still value
+      if (state == "still") {
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate");
+        console.log("changing to animate")
+      } else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still");
+        console.log("changing to still")
+      }
+    });
+         
         
 
             $('#add-tvshow').on("click", function(event) {
